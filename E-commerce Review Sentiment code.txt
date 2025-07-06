@@ -1,0 +1,32 @@
+# E-commerce Review Sentiment Analysis
+
+import pandas as pd
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+
+# Download VADER (only first time)
+nltk.download('vader_lexicon')
+
+# Load dataset
+df = pd.read_csv("data/amazon_reviews.csv")
+sid = SentimentIntensityAnalyzer()
+
+# Apply sentiment analysis
+df['scores'] = df['Review'].apply(lambda x: sid.polarity_scores(str(x)))
+df['compound'] = df['scores'].apply(lambda x: x['compound'])
+df['sentiment'] = df['compound'].apply(lambda x: 'positive' if x >= 0 else 'negative')
+
+# Plot sentiment counts
+df['sentiment'].value_counts().plot(kind='bar', title='Sentiment Distribution')
+plt.show()
+
+# Generate Word Cloud
+text = ' '.join(df['Review'].dropna().astype(str))
+wordcloud = WordCloud(width=800, height=400).generate(text)
+plt.figure(figsize=(10, 5))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis('off')
+plt.title('Word Cloud of Reviews')
+plt.show()
